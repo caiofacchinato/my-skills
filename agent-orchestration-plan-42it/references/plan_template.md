@@ -10,8 +10,9 @@
 > Este documento é o mesmo nos dois modos de entrega (ver Passo 6 do SKILL.md). A única diferença é
 > a seção 4: em modo documento, cada prompt de fase é escrito aqui, no corpo do documento, para
 > copiar e colar; em modo kit, esta seção vira só uma lista curta (nome da fase + uma frase) porque
-> o prompt completo já mora no arquivo de comando correspondente — ver
-> `references/claude_code_kit.md`.
+> o prompt completo já mora no arquivo da fase (`docs/fases/<fase>.md`) — ver
+> `references/claude_code_kit.md`. Em modo kit, o Bloco A também recebe a seção "Protocolo de
+> fases" (texto pronto no mesmo arquivo), que é o que permite ao usuário só dizer "próximo".
 
 ---
 
@@ -22,7 +23,7 @@
 
 > Este documento é para o humano usar, não para o agente. Ele contém: (1) o contexto fixo do
 > produto, que deve virar um arquivo de memória no repositório, e (2) o roadmap de fases, em ordem,
-> com os prompts prontos para colar (modo documento) ou já como arquivo de comando pronto para o
+> com os prompts prontos para colar (modo documento) ou já como arquivos de fase prontos para o
 > repositório (modo kit) na [FERRAMENTA: Claude Code / Gemini Antigravity / OpenCode / outra].
 ```
 
@@ -35,14 +36,18 @@
    equivalente da ferramenta escolhida — ex.: `AGENTS.md` é aceito por várias delas). Se você
    recebeu o kit de arquivos junto com este documento, isso já vem pronto — só copiar a pasta.
 3. Rode os prompts em ordem, um por sessão (contexto limpo a cada um). Não pule etapas. Se você
-   recebeu o kit de arquivos, isso é `/fase-0`, `/fase-1a`... na ferramenta agentic, ou `/proximo`
-   para deixá-la decidir a próxima fase pendente sozinha.
-4. Depois de cada PR gerado pelo agente, revise você mesmo antes de seguir para o próximo prompt.
-   Não encadeie tudo automaticamente — cada fase é um ponto de checagem humana. O comando `/proximo`
-   do kit também respeita isso: ele para e reporta entre uma fase e outra, mesmo quando você pede
-   várias de uma vez.
+   recebeu o kit de arquivos, basta abrir a ferramenta agentic no repositório e dizer algo natural:
+   "começar fase-0", "1a", ou só "próximo" para deixá-la decidir a próxima fase pendente sozinha.
+   Ela confirma em uma linha qual fase vai executar antes de agir.
+4. Depois de cada PR gerado pelo agente, revise você mesmo. Ao final de cada fase o agente pergunta
+   se ela está ok: se você responder que sim, ele faz o merge do PR e limpa as branches da fase
+   (local e remota) sozinho, deixando `main` atualizada para a próxima; se pedir ajustes, ele
+   corrige na mesma branch e pergunta de novo. Não encadeie tudo automaticamente — cada fase é um
+   ponto de checagem humana, e sem o seu "ok" não há merge. O protocolo do kit também
+   respeita isso: o agente para e pergunta entre uma fase e outra, mesmo quando você pede várias de
+   uma vez.
 5. Cada prompt já instrui o agente a atualizar `docs/PROGRESS.md`. É esse arquivo que evita perder
-   o fio da meada entre sessões — e, em modo kit, é o mesmo arquivo que o comando `/proximo` lê para
+   o fio da meada entre sessões — e, em modo kit, é o mesmo arquivo que o Protocolo de fases lê para
    saber qual é a próxima fase.
 ```
 
@@ -73,7 +78,8 @@ ainda o estado técnico real, diga isso explicitamente — é o objetivo da Fase
 ## Como trabalhar neste repositório
 - Leia sempre docs/PROGRESS.md e docs/DECISIONS.md antes de começar qualquer tarefa nova.
 - Uma branch por fase/subfase, commits em Conventional Commits, um PR para main ao final de cada
-  etapa.
+  etapa. Ao final de cada etapa, pergunte ao usuário se ela está ok; só com resposta positiva
+  explícita, faça o merge do PR e apague a branch da fase (local e remota).
 - Nunca commitar segredos (.env, chaves de API, credenciais reais).
 - Ao final de cada sessão, atualizar docs/PROGRESS.md com o que foi feito, o que falta, e
   problemas encontrados.
@@ -130,7 +136,7 @@ Critério de pronto da Fase 1: [uma frase objetiva e testável].
 
 Os rótulos acima ("Fase 0", "1A"...) são para leitura humana no documento. **Em modo kit**, cada
 um também precisa de um slug idêntico em minúsculas e com hífen — `fase-0`, `fase-1a`, `fase-1b`,
-`fase-2` — que é o nome real do arquivo de comando e a string usada no checklist de
+`fase-2` — que é o nome real do arquivo em `docs/fases/` e a string usada no checklist de
 `docs/PROGRESS.md`. Defina o slug de cada fase aqui mesmo, junto do roadmap, e reuse-o sem
 variação em todo o resto do kit (ver `references/claude_code_kit.md`).
 
@@ -141,6 +147,12 @@ variação em todo o resto do kit (ver `references/claude_code_kit.md`).
   (`phase-0/...`, `phase-1/...`, `phase-2/...`).
 - Commits em Conventional Commits (feat:, fix:, docs:, refactor:, chore:, test:).
 - Um PR por etapa, com descrição do que mudou, o que foi testado manualmente, e riscos conhecidos.
+- Encerramento de etapa: o agente pergunta se a etapa está ok. Com resposta positiva explícita, ele
+  faz o merge do PR (squash, salvo decisão em contrário em `docs/DECISIONS.md`), confirma que o
+  estado é `MERGED`, volta para `main` atualizada e apaga a branch da etapa, local e remota. Sem
+  resposta positiva (ajustes pedidos, resposta ambígua), não há merge nem limpeza. Se o merge for
+  bloqueado (checks, review exigido, conflito), o agente para e reporta — nunca contorna a proteção
+  de `main`.
 - Nenhum segredo commitado — usar `.env.example` sem valores reais.
 ```
 
@@ -168,22 +180,29 @@ Tarefas:
 Regras:
 - [o que explicitamente NÃO fazer nesta fase — delimitar escopo]
 - Branch: `[nome]`. Commits Conventional Commits. PR ao final.
-- Atualize docs/PROGRESS.md marcando o que foi concluído e o que ficou pendente.
+- Atualize docs/PROGRESS.md marcando o que foi concluído e o que ficou pendente (dentro do PR).
 
-Ao final, resuma: [o que você quer que o agente reporte de volta].
+Ao final da implementação, resuma: [o que você quer que o agente reporte de volta] e pergunte
+explicitamente se a etapa está ok para ser encerrada.
+
+Encerramento — só depois de resposta positiva explícita: faça o merge do PR (`gh pr merge <PR>
+--squash --delete-branch`), confirme que o estado é `MERGED`, volte para `main` (`git checkout main
+&& git pull --ff-only && git fetch --prune`) e apague a branch local desta etapa se ainda existir.
+Se o merge for bloqueado, pare e reporte. Se o usuário pedir ajustes, não faça merge: ajuste na
+mesma branch e pergunte de novo.
 ```
 ```
 
 Use este esqueleto para cada prompt do roadmap (Fase 0, cada subfase da Fase 1, e cada fase de
 funcionalidade seguinte).
 
-**Em modo kit**, este mesmo esqueleto vira o conteúdo de `.claude/commands/<fase>.md` (formato
-exato em `references/claude_code_kit.md`) — não escreva o prompt aqui também. Aqui, nesta seção do
+**Em modo kit**, este mesmo esqueleto vira o conteúdo de `docs/fases/<fase>.md` (formato exato em
+`references/claude_code_kit.md`) — não escreva o prompt aqui também. Aqui, nesta seção do
 documento, entra só uma lista curta apontando para cada arquivo:
 
 ```markdown
-- `fase-0` — [uma frase]. Arquivo: `.claude/commands/fase-0.md`.
-- `fase-1a` — [uma frase]. Arquivo: `.claude/commands/fase-1a.md`.
+- `fase-0` — [uma frase]. Arquivo: `docs/fases/fase-0.md`.
+- `fase-1a` — [uma frase]. Arquivo: `docs/fases/fase-1a.md`.
 ...
 ```
 
@@ -201,8 +220,7 @@ públicos, dados pessoais/LGPD, etc.). Mesmo que a lista fique curta, não omita
 Ferramentas como o Claude Code permitem subagentes especializados (um para backend, um para
 frontend, um para QA). Usar um subagente para isolar contexto — ele roda uma tarefa específica
 com um mínimo de contexto e devolve um resumo para esta sessão — é seguro desde a primeira fase
-e está incluído no kit de arquivos deste plano, quando gerado (ver seção de comandos e
-subagentes). O que fica para depois é rodar várias fases *em paralelo*, editando código ao mesmo
+e está incluído no kit de arquivos deste plano, quando gerado (ver seção de subagentes). O que fica para depois é rodar várias fases *em paralelo*, editando código ao mesmo
 tempo: para a reestruturação inicial, a recomendação é manter as fases sequenciais e revisadas
 pelo humano a cada PR — é mais fácil de auditar enquanto a base de código ainda está instável.
 ```
