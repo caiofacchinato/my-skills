@@ -9,9 +9,10 @@ sufixo `-42it` pra distinguir das skills padrão/de terceiros em projetos maiore
 Cria ou atualiza um plano faseado de prompts para orquestrar agentes de codificação de IA (Claude
 Code, Gemini Antigravity, OpenCode etc.) num projeto novo ou existente. Pode gerar só o documento
 do plano (para copiar/colar) ou o kit completo de arquivos pronto para o repositório — memória
-entre sessões (`CLAUDE.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md`), um comando
-por fase, um comando orquestrador que segue o roadmap sem pular etapas, e subagentes com contexto
-isolado para tarefas especializadas.
+entre sessões (`CLAUDE.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md`), um arquivo
+por fase, um protocolo no `CLAUDE.md` que permite abrir uma sessão e dizer só "próximo" ou "começar
+fase-1c" para seguir o roadmap sem pular etapas (com merge do PR e limpeza de branch após o seu
+"ok" ao fim de cada fase), e subagentes com contexto isolado para tarefas especializadas.
 
 ### [`project-discovery-42it`](./project-discovery-42it)
 Explora e documenta o estado atual de um projeto/código já existente, antes de qualquer plano de

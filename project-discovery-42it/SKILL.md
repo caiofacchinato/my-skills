@@ -91,7 +91,7 @@ Seções obrigatórias (detalhe exato em `references/audit_template.md`):
 ## Passo 5 — Entregar
 
 - Entregue só `docs/AUDIT.md`. Não crie `CLAUDE.md`/`AGENTS.md`, não crie `docs/DECISIONS.md` nem
-  `docs/PROGRESS.md`, e não gere nenhum arquivo de comando ou subagente — tudo isso é trabalho da
+  `docs/PROGRESS.md`, e não gere nenhum arquivo de fase, comando ou subagente — tudo isso é trabalho da
   skill `agent-orchestration-plan-42it`, que deve ser usada depois, quando o usuário já tiver uma
   mudança específica para planejar.
 - Não proponha roadmap nem fases — isso ainda não é um plano, é só o retrato do que existe hoje.
